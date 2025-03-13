@@ -1,0 +1,21 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "libarybackend",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-03-11",
+	"nodejs_compat": true,
+	"observability": {
+		"enabled": true
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "booksdatabase",
+			"database_id": "ee912001-0708-46dd-bcc0-c9b5619f68c3"
+		}
+	]
+}

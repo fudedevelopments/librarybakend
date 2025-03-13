@@ -1,0 +1,8 @@
+[vars]
+JWT_SECRET = "your-very-secure-secret-key" 
+
+# In production, use a more secure secret and set it through environment variables
+# or Cloudflare's dashboard, not in this file 
+
+# Enable Node.js compatibility
+nodejs_compat = true 
