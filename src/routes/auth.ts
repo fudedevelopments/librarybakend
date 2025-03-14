@@ -30,7 +30,6 @@ auth.post('/register', async (c) => {
             return c.json({ error: 'Username, email, and password are required' }, 400);
         }
 
-        // Check if username or email already exists
         const existingUser = await c.env.DB.prepare(
             'SELECT * FROM users WHERE username = ? OR email = ?'
         )
@@ -41,7 +40,7 @@ auth.post('/register', async (c) => {
             return c.json({ error: 'Username or email already exists' }, 409);
         }
 
-        // Generate salt and hash password
+
         const salt = await generateSalt();
         const passwordHash = await hashPassword(password, salt);
         const id = uuidv4();
@@ -107,13 +106,24 @@ auth.post('/login', async (c) => {
 
         // Generate JWT token
         try {
+            // Get JWT secret with fallback for development
+            const jwtSecret = c.env.JWT_SECRET || 'neclibrary-secure-jwt-secret-key-2025';
+
+            // Log JWT secret for debugging (remove in production)
+            console.log('JWT_SECRET exists:', !!jwtSecret);
+            console.log('JWT_SECRET length:', jwtSecret.length);
+
+            const payload = {
+                userId: user.id,
+                username: user.username,
+                role: user.role,
+            };
+
+            console.log('Creating token with payload:', JSON.stringify(payload));
+
             const token = await createToken(
-                {
-                    userId: user.id,
-                    username: user.username,
-                    role: user.role,
-                },
-                c.env.JWT_SECRET,
+                payload,
+                jwtSecret,
                 86400 // 24 hours
             );
 
@@ -129,7 +139,10 @@ auth.post('/login', async (c) => {
             });
         } catch (tokenError) {
             console.error('Token creation error:', tokenError);
-            return c.json({ error: 'Failed to create authentication token' }, 500);
+            return c.json({
+                error: 'Failed to create authentication token',
+                details: tokenError instanceof Error ? tokenError.message : 'Unknown error'
+            }, 500);
         }
     } catch (error) {
         console.error('Login error:', error);
@@ -149,7 +162,10 @@ auth.get('/profile', async (c) => {
         const token = authHeader.split(' ')[1];
 
         try {
-            const decoded = await verifyToken(token, c.env.JWT_SECRET);
+            // Get JWT secret with fallback for development
+            const jwtSecret = c.env.JWT_SECRET || 'neclibrary-secure-jwt-secret-key-2025';
+
+            const decoded = await verifyToken(token, jwtSecret);
 
             const user = await c.env.DB.prepare('SELECT id, username, email, role, created_at FROM users WHERE id = ?')
                 .bind(decoded.userId)

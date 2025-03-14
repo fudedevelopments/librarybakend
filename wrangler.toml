@@ -1,8 +1,17 @@
+name = "libarybackend"
+main = "src/index.ts"
+compatibility_date = "2023-12-01"
+
 [vars]
-JWT_SECRET = "your-very-secure-secret-key" 
+JWT_SECRET = "neclibrary-secure-jwt-secret-key-2025"
 
 # In production, use a more secure secret and set it through environment variables
 # or Cloudflare's dashboard, not in this file 
 
 # Enable Node.js compatibility
-nodejs_compat = true 
+nodejs_compat = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "booksdatabase"
+database_id = "ee912001-0708-46dd-bcc0-c9b5619f68c3" 

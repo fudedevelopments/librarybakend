@@ -35,15 +35,3 @@ export const authMiddleware = async (c: Context, next: Next) => {
         return c.json({ error: 'Internal server error' }, 500);
     }
 };
-
-export const adminAuthMiddleware = async (c: Context, next: Next) => {
-    await authMiddleware(c, async () => {
-        const payload = c.get('jwtPayload') as JWTPayload;
-
-        if (payload.role !== 'admin') {
-            return c.json({ error: 'Forbidden - Admin access required' }, 403);
-        }
-
-        await next();
-    });
-}; 

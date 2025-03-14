@@ -7,7 +7,6 @@
 	"name": "libarybackend",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-03-11",
-	"nodejs_compat": true,
 	"observability": {
 		"enabled": true
 	},
@@ -15,7 +14,8 @@
 		{
 			"binding": "DB",
 			"database_name": "booksdatabase",
-			"database_id": "ee912001-0708-46dd-bcc0-c9b5619f68c3"
+			"database_id": "b21da39a-b9a6-4ae6-a284-2fc32517a68f"
 		}
 	]
+	
 }

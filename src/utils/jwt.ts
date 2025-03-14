@@ -1,9 +1,3 @@
-/**
- * Simple JWT implementation using Web Crypto API
- * This is more compatible with Cloudflare Workers than jsonwebtoken
- */
-
-// Base64Url encoding/decoding functions
 function base64UrlEncode(str: string | ArrayBuffer): string {
     let bytes;
     if (typeof str === 'string') {
@@ -31,6 +25,15 @@ function base64UrlDecode(str: string): Uint8Array {
 // Create a JWT token
 export async function createToken(payload: any, secret: string, expiresIn: number = 86400): Promise<string> {
     try {
+        // Validate inputs
+        if (!payload || typeof payload !== 'object') {
+            throw new Error('Invalid payload: must be a non-null object');
+        }
+
+        if (!secret || typeof secret !== 'string' || secret.trim() === '') {
+            throw new Error('Invalid secret: must be a non-empty string');
+        }
+
         // Create header
         const header = {
             alg: 'HS256',
@@ -48,19 +51,25 @@ export async function createToken(payload: any, secret: string, expiresIn: numbe
 
         // Create signature
         const data = new TextEncoder().encode(`${encodedHeader}.${encodedPayload}`);
-        const secretKey = await crypto.subtle.importKey(
-            'raw',
-            new TextEncoder().encode(secret),
-            { name: 'HMAC', hash: 'SHA-256' },
-            false,
-            ['sign']
-        );
 
-        const signature = await crypto.subtle.sign('HMAC', secretKey, data);
-        const encodedSignature = base64UrlEncode(signature);
+        try {
+            const secretKey = await crypto.subtle.importKey(
+                'raw',
+                new TextEncoder().encode(secret),
+                { name: 'HMAC', hash: 'SHA-256' },
+                false,
+                ['sign']
+            );
 
-        // Return complete JWT
-        return `${encodedHeader}.${encodedPayload}.${encodedSignature}`;
+            const signature = await crypto.subtle.sign('HMAC', secretKey, data);
+            const encodedSignature = base64UrlEncode(signature);
+
+            // Return complete JWT
+            return `${encodedHeader}.${encodedPayload}.${encodedSignature}`;
+        } catch (cryptoError) {
+            console.error('Crypto API error:', cryptoError);
+            throw new Error(`JWT signing failed: ${cryptoError}`);
+        }
     } catch (error) {
         console.error('Error creating token:', error);
         throw error;
@@ -105,6 +114,6 @@ export async function verifyToken(token: string, secret: string): Promise<any> {
 
         return payload;
     } catch (error) {
-        throw new Error(`Token verification failed: ${error.message}`);
+        throw new Error(`Token verification failed: ${error}`);
     }
 } 
